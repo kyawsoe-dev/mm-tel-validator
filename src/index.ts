@@ -10,7 +10,8 @@ export {
   getPhoneNetworkType,
   normalizeInput,
   sanitizeInput,
-  getOperatorConfig
+  getOperatorConfig,
+  validateMultiple
 } from './validator';
 
 export {
@@ -22,5 +23,6 @@ export type {
   ValidationResult,
   OperatorBrand,
   OperatorName,
-  NetworkType
+  NetworkType,
+  BatchValidationResult
 } from './types';

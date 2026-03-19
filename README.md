@@ -14,6 +14,7 @@ Try it online: [https://mm-phone-number-check.vercel.app](https://mm-phone-numbe
 - **Myanmar Numeral Support** - Accepts both Arabic (0-9) and Myanmar (၀-၉) numerals
 - **Multiple Format Support** - Handles local (09...), international (+959...), and various formats
 - **Operator Brand Info** - Get operator colors, labels, and icons for UI styling
+- **Batch Validation** - Validate multiple phone numbers at once
 - **TypeScript Support** - Full TypeScript types included
 - **Dual Module Format** - Supports both CommonJS and ESM
 
@@ -33,11 +34,11 @@ const {
   isValidMMPhoneNumber,
   getTelecomName,
   getPhoneNetworkType,
-  OPERATORS
-} = require('mm-tel-validator');
+  OPERATORS,
+} = require("mm-tel-validator");
 
 // Validate a phone number
-const result = validatePhoneNumber('09977889900');
+const result = validatePhoneNumber("09977889900");
 console.log(result);
 // {
 //   isValid: true,
@@ -50,15 +51,15 @@ console.log(result);
 // }
 
 // Check if valid
-const isValid = isValidMMPhoneNumber('0977889900');
+const isValid = isValidMMPhoneNumber("09977889900");
 console.log(isValid); // true
 
 // Get operator name
-const operator = getTelecomName('0977889900');
-console.log(operator); // 'Telenor'
+const operator = getTelecomName("09977889900");
+console.log(operator); // 'Ooredoo'
 
 // Get network type
-const networkType = getPhoneNetworkType('0977889900');
+const networkType = getPhoneNetworkType("09977889900");
 console.log(networkType); // 'GSM'
 ```
 
@@ -73,35 +74,45 @@ import {
   OPERATORS,
   type ValidationResult,
   type OperatorName,
-  type NetworkType
-} from 'mm-tel-validator';
+  type NetworkType,
+} from "mm-tel-validator";
 
 // Validate a phone number
-const result: ValidationResult = validatePhoneNumber('09977889900');
+const result: ValidationResult = validatePhoneNumber("09977889900");
+
+console.log(result);
+// {
+//   isValid: true,
+//   phoneNumber: '09977889900',
+//   operator: 'Ooredoo',
+//   operatorLabel: 'U9',
+//   operatorColor: '#e11d48',
+//   operatorIcon: '🔴',
+//   networkType: 'GSM'
+// }
 
 // Get operator name
-const operator: OperatorName = getTelecomName('0977889900');
+const operator: OperatorName = getTelecomName("09977889900");
+console.log(operator); // 'Ooredoo'
 
 // Get network type
-const networkType: NetworkType = getPhoneNetworkType('0977889900');
+const networkType: NetworkType = getPhoneNetworkType("09977889900");
+console.log(networkType); // 'GSM'
 
-// Access operator constants
-console.log(OPERATORS.OOREDOO);
-// { name: 'Ooredoo', label: 'U9', color: '#e11d48', icon: '🔴', ... }
 ```
 
 ### React Example
 
 ```tsx
-import { validatePhoneNumber, OPERATORS } from 'mm-tel-validator';
+import { validatePhoneNumber, OPERATORS } from "mm-tel-validator";
 
 function PhoneInput({ phoneNumber }: { phoneNumber: string }) {
   const result = validatePhoneNumber(phoneNumber);
-  
+
   if (!result.isValid) {
     return <div>Invalid phone number</div>;
   }
-  
+
   return (
     <div style={{ color: result.operatorColor }}>
       {result.operatorIcon} {result.operator} - {result.networkType}
@@ -110,15 +121,90 @@ function PhoneInput({ phoneNumber }: { phoneNumber: string }) {
 }
 ```
 
+### Batch Validation
+
+Validate multiple phone numbers at once with summary statistics.
+
+```javascript
+const { validateMultiple } = require("mm-tel-validator");
+
+const phoneNumbers = ["09977889900", "0977889900", "0961234567", "invalid"];
+const results = validateMultiple(phoneNumbers);
+
+console.log(results);
+// {
+//   total: 4,
+//   valid: 3,
+//   invalid: 1,
+//   results: [
+//     {
+//       isValid: true,
+//       phoneNumber: '09977889900',
+//       operator: 'Ooredoo',
+//       operatorLabel: 'U9',
+//       operatorColor: '#e11d48',
+//       operatorIcon: '🔴',
+//       networkType: 'GSM',
+//       original: '09977889900'
+//     },
+//     {
+//       isValid: true,
+//       phoneNumber: '0977889900',
+//       operator: 'MPT',
+//       operatorLabel: 'MPT',
+//       operatorColor: '#0ea5e9',
+//       operatorIcon: '🔵',
+//       networkType: 'GSM',
+//       original: '0977889900'
+//     },
+//     {
+//       isValid: true,
+//       phoneNumber: '09682345677',
+//       operator: 'MyTel',
+//       operatorLabel: 'MyTel',
+//       operatorColor: '#7c3aed',
+//       operatorIcon: '🟣',
+//       networkType: 'GSM',
+//       original: '09682345677'
+//     },
+//     {
+//       isValid: false,
+//       phoneNumber: 'invalid',
+//       original: 'invalid'
+//     }
+//   ]
+// }
+
+// Filter only valid numbers
+const validNumbers = results.results.filter((r) => r.isValid);
+
+// Get summary
+console.log(`Valid: ${results.valid}/${results.total}`);
+```
+
+```typescript
+import { validateMultiple, type BatchValidationResult } from "mm-tel-validator";
+
+const results: BatchValidationResult = validateMultiple([
+  "09977889900",
+  "0977889900",
+  "0961234567",
+]);
+
+console.log(
+  `Validated ${results.total} numbers: ${results.valid} valid, ${results.invalid} invalid`,
+);
+```
+
 ## Supported Operators
 
-| Operator | Code | Prefix | Color | Icon |
-|----------|------|--------|-------|------|
-| Ooredoo | U9 | 099xxxxxxx | 🔴 #e11d48 | 🔴 |
-| Telenor | Telenor | 097xxxxxxx | 🔴 #0ea5e9 | 🔴 |
-| MPT | MPT | Multiple prefixes | 🟡 #f59e0b | 🟡 |
-| MyTel | MyTel | 096xxxxxxx | 🟣 #7c3aed | 🟣 |
-| MEC | MEC | 093xxxxxxx | 🟢 #22c55e | 🟢 |
+| Operator | Code    | Prefix            | Color      | Icon |
+| -------- | ------- | ----------------- | ---------- | ---- |
+| Ooredoo  | U9      | 099xxxxxxx        | 🔴 #e11d48 | 🔴   |
+| Telenor  | Telenor | 097xxxxxxx        | 🔴 #0ea5e9 | 🔴   |
+| MPT      | MPT     | Multiple prefixes | 🟡 #f59e0b | 🟡   |
+| MyTel    | MyTel   | 096xxxxxxx        | 🟣 #7c3aed | 🟣   |
+| MEC      | MEC     | 093xxxxxxx        | 🟢 #22c55e | 🟢   |
 
 ## Supported Formats
 
@@ -138,6 +224,7 @@ function PhoneInput({ phoneNumber }: { phoneNumber: string }) {
 Complete phone number validation with all details.
 
 **Returns:**
+
 - `isValid` - Whether the phone number is valid
 - `phoneNumber` - Normalized phone number
 - `operator` - Operator name (Ooredoo, Telenor, MPT, MEC, MyTel, Unknown)
@@ -188,9 +275,14 @@ interface ValidationResult {
   networkType?: NetworkType;
 }
 
-type OperatorName = 'Ooredoo' | 'Telenor' | 'MPT' | 'MEC' | 'MyTel' | 'Unknown';
+type OperatorName = "Ooredoo" | "Telenor" | "MPT" | "MEC" | "MyTel" | "Unknown";
 
-type NetworkType = 'GSM' | 'WCDMA' | 'CDMA 450 MHz' | 'CDMA 800 MHz' | 'Unknown';
+type NetworkType =
+  | "GSM"
+  | "WCDMA"
+  | "CDMA 450 MHz"
+  | "CDMA 800 MHz"
+  | "Unknown";
 
 interface OperatorBrand {
   name: string;

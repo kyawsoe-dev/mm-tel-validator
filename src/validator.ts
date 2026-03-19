@@ -186,3 +186,41 @@ export function validatePhoneNumber(phoneNumber: string): ValidationResult {
     networkType: isValid ? getPhoneNetworkType(phoneNumber) : undefined
   };
 }
+
+/**
+ * Result of batch phone number validation
+ */
+export interface BatchValidationResult {
+  total: number;
+  valid: number;
+  invalid: number;
+  results: Array<ValidationResult & { original: string }>;
+}
+
+/**
+ * Validate multiple phone numbers at once
+ * @param phoneNumbers - Array of phone numbers to validate
+ * @returns Batch validation result with summary and individual results
+ */
+export function validateMultiple(phoneNumbers: string[]): BatchValidationResult {
+  if (!Array.isArray(phoneNumbers)) {
+    throw new Error('Input must be an array of phone numbers.');
+  }
+
+  const results: Array<ValidationResult & { original: string }> = phoneNumbers.map((phone) => {
+    const validation = validatePhoneNumber(phone);
+    return {
+      ...validation,
+      original: phone
+    };
+  });
+
+  const validCount = results.filter((r) => r.isValid).length;
+
+  return {
+    total: phoneNumbers.length,
+    valid: validCount,
+    invalid: phoneNumbers.length - validCount,
+    results
+  };
+}

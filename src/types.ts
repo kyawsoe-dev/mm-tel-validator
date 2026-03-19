@@ -44,6 +44,16 @@ export interface ValidationResult {
 }
 
 /**
+ * Result of batch phone number validation
+ */
+export interface BatchValidationResult {
+  total: number;
+  valid: number;
+  invalid: number;
+  results: Array<ValidationResult & { original: string }>;
+}
+
+/**
  * Constants for all operators
  */
 export const OPERATORS: Record<string, OperatorBrand> = {
