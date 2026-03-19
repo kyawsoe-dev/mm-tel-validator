@@ -1,6 +1,6 @@
 {
   "name": "mm-tel-validator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Myanmar phone number validator with operator detection, network type identification, and brand information.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
